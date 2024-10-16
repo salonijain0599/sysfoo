@@ -28,6 +28,7 @@ pipeline {
     }
 
     stage('package') {
+       when {branch 'main'}
       parallel {
         stage('package') {
           agent {
@@ -45,7 +46,7 @@ pipeline {
 
         stage('Docker Build&Package') {
           agent any
-          when {branch 'main'}
+         
           steps {
             script {
               docker.withRegistry('https://index.docker.io/v1/', 'dockerlogin') {
@@ -60,6 +61,22 @@ pipeline {
           }
         }
 
+
+      }
+    }
+
+    
+            stage('Deploy to Dev') {
+      when {
+             beforeAgent true
+             branch  'main'
+           }
+
+      agent any
+
+      steps {
+        echo 'Deploying to Dev Environment with Docker Compose'
+        sh 'docker-compose up -d'
       }
     }
 
